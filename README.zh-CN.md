@@ -74,6 +74,7 @@ Native/Official 截图，以及通过的替换版细节与几何门禁。
 | **[全图表路线](docs/full-diagram-roadmap.md)** | 官方 33 家族清单和已完成的 33/33 家族门禁 |
 | **[Stable 测试报告](docs/stability-report.md)** | Stable 判定、视觉对比图、测试、压力指标、运行时负载证据和复现步骤 |
 | **[全部 8,448 个 Native/Official 对比](docs/assets/stability-report/visual-parity-evidence.md)** | 528 页分页对比图，每页包含 16 组同源码结果 |
+| **[异常源码 Native/Official 证据](docs/assets/invalid-source-report/invalid-source-evidence.md)** | 33 个图表家族各一组异常源码、66 张截图和 3 张对比图 |
 | **[Android 物理设备兼容性报告](docs/android-real-device-compatibility.md)** | Kotlin 2.3.20 与 Kotlin 1.7.21 分别覆盖 Android 9-16 |
 | **[iOS 物理设备兼容性报告](docs/ios-real-device-compatibility.md)** | iOS 14.3-26.0 共 6 台设备的完整 441 场景负载 |
 | [生产能力矩阵](docs/production-capability-matrix.md) | 738 项被独立验证的能力 |
