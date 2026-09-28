@@ -18,3 +18,4 @@ rootProject.name = "cmp-mermaid-android-kotlin17"
 
 include(":mermaid-core-android-kotlin17")
 include(":mermaid-compose-android-kotlin17")
+include(":device-audit")

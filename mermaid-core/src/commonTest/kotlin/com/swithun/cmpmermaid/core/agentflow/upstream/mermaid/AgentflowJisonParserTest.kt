@@ -152,6 +152,34 @@ class AgentflowJisonParserTest {
         assertIs<GMResult.Err<MermaidError>>(result)
     }
 
+    @Test
+    fun preservesBlankLinePositionsAfterMetadataBlocks() {
+        // Mermaid.js 12.0.0:
+        // agentflow/parser/agentflow-blank-line-fold.spec.ts
+        val db = parse(
+            """
+                agentflow-beta
+                flow f["F"]
+                  a["A"]@{ shape: rounded }
+
+                  b["B"]
+                end
+            """.trimIndent(),
+        )
+
+        assertEquals(5, db.getElementById("b")?.position?.startLine)
+    }
+
+    @Test
+    fun stripsHorizontalWhitespaceAfterMetadataClosingBrace() {
+        // The escaped closing brace keeps the upstream regex valid on Android ICU.
+        val db = parse(
+            "agentflow-beta TB\n  a[\"A\"]@{ shape: rounded }   \n\n  b[\"B\"]",
+        )
+
+        assertEquals(4, db.getElementById("b")?.position?.startLine)
+    }
+
     private fun parse(
         source: String,
         frontmatterLineOffset: Int = 0,

@@ -51,16 +51,13 @@ internal fun ProductionLoadTestScreen(
     onBack: () -> Unit,
     autoRun: Boolean,
 ) {
+    if (autoRun) {
+        AutomatedProductionLoadTestScreen(onBack = onBack)
+        return
+    }
+
     val listState = rememberLazyListState()
     var reachedLastCase by remember { mutableStateOf(false) }
-    LaunchedEffect(autoRun) {
-        if (autoRun) {
-            productionCorpusCases.indices.forEach { index ->
-                listState.scrollToItem(index)
-                delay(AUTO_RUN_ITEM_DELAY_MILLIS)
-            }
-        }
-    }
     Scaffold(
         topBar = {
             TopAppBar(
@@ -137,13 +134,104 @@ internal fun ProductionLoadTestScreen(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun AutomatedProductionLoadTestScreen(onBack: () -> Unit) {
+    var caseIndex by remember { mutableStateOf(0) }
+    var caseOutcome by remember(caseIndex) { mutableStateOf<LoadCaseOutcome?>(null) }
+    var failedCaseIds by remember { mutableStateOf(emptySet<String>()) }
+    var completed by remember { mutableStateOf(false) }
+    val case = productionCorpusCases[caseIndex]
+
+    LaunchedEffect(caseOutcome) {
+        if (caseOutcome == null || completed) {
+            return@LaunchedEffect
+        }
+        delay(AUTO_RUN_ITEM_DELAY_MILLIS)
+        if (caseIndex == productionCorpusCases.lastIndex) {
+            completed = true
+            println("$LOAD_TEST_COMPLETE_MARKER ${case.id}")
+        } else {
+            caseIndex += 1
+        }
+    }
+
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                navigationIcon = {
+                    IconButton(onClick = onBack) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Back",
+                        )
+                    }
+                },
+                title = {
+                    Column {
+                        Text(
+                            text = "Production load test",
+                            fontWeight = FontWeight.SemiBold,
+                            letterSpacing = 0.sp,
+                        )
+                        Text(
+                            text = if (completed) {
+                                "${productionCorpusCases.size}/${productionCorpusCases.size} " +
+                                    "rendered, ${failedCaseIds.size} failed"
+                            } else {
+                                "${caseIndex + 1}/${productionCorpusCases.size} ${case.id}"
+                            },
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            fontSize = 12.sp,
+                        )
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.surface,
+                ),
+            )
+        },
+    ) { contentPadding ->
+        MermaidDiagram(
+            source = case.source,
+            options = MermaidRenderOptions(layout = case.layout),
+            modifier = Modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.surface)
+                .padding(contentPadding)
+                .semantics {
+                    contentDescription = "Load test diagram ${case.id}"
+                },
+            respectSourceViewportSizing = false,
+            onRenderResult = { result ->
+                if (caseOutcome == null) {
+                    caseOutcome = when (result) {
+                        is GMResult.Ok -> LoadCaseOutcome.Rendered
+                        is GMResult.Err -> {
+                            failedCaseIds = failedCaseIds + case.id
+                            println("$LOAD_TEST_FAILURE_MARKER ${case.id}: ${result.error}")
+                            LoadCaseOutcome.Failed
+                        }
+                    }
+                }
+            },
+        )
+    }
+}
+
 private const val AUTO_RUN_ITEM_DELAY_MILLIS = 75L
+
+private enum class LoadCaseOutcome {
+    Rendered,
+    Failed,
+}
 
 @Composable
 private fun LoadTestDiagram(
     case: StabilityCorpusCase,
     onRendered: (() -> Unit)?,
 ) {
+    var failureReported by remember(case.id) { mutableStateOf(false) }
     val shape = RoundedCornerShape(8.dp)
     Column(
         modifier = Modifier
@@ -175,8 +263,14 @@ private fun LoadTestDiagram(
                 },
             respectSourceViewportSizing = false,
             onRenderResult = { result ->
-                if (result is GMResult.Ok) {
-                    onRendered?.invoke()
+                when (result) {
+                    is GMResult.Ok -> onRendered?.invoke()
+                    is GMResult.Err -> {
+                        if (!failureReported) {
+                            failureReported = true
+                            println("$LOAD_TEST_FAILURE_MARKER ${case.id}: ${result.error}")
+                        }
+                    }
                 }
             },
         )
@@ -184,3 +278,4 @@ private fun LoadTestDiagram(
 }
 
 private const val LOAD_TEST_COMPLETE_MARKER = "CMP_MERMAID_LOAD_TEST_COMPLETE"
+private const val LOAD_TEST_FAILURE_MARKER = "CMP_MERMAID_LOAD_TEST_FAILED"

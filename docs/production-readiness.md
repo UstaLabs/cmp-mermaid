@@ -51,8 +51,8 @@ contract.
 | Parser/layout robustness | Systematic matrix and deterministic randomized corpus pass resource limits | 8,448 visual-matrix Native renders pass; the separate 7,936-case randomized stress baseline remains published | Passing |
 | Core throughput | 2,075 warmed production renders complete within 45s and P95 is at most 500ms | Local baseline: 674ms total, 1ms P95 | Passing; enforced by JVM test |
 | Core retained heap | The same soak retains at most 64 MiB after forced GC | Local baseline: 63,968 bytes | Passing; enforced by JVM test |
-| Runtime matrix | Android, iOS Simulator, Desktop, and Web render representative complex cases | Web passed the preceding 397-scenario corpus; Android, iOS, and Desktop retain the prior 236-scenario baseline | Passing retained baselines; no fresh 441-case rerun is claimed |
-| Runtime load | A scrolling page with many mixed diagrams stays responsive and within a documented memory budget | Preceding 397-diagram Web run and prior 236-diagram native runs recorded below | Passing for the recorded corpus on each platform |
+| Runtime matrix | Android, iOS, Desktop, and Web render representative complex cases | Kotlin 2.3.20 Android 8/8, Kotlin 1.7.21 Android 8/8, and iOS 6/6 physical devices passed all 441 cases; Web retains the preceding 397-scenario baseline; iOS Simulator and Desktop retain the prior 236-scenario baseline | Passing for the recorded corpus on each platform |
+| Runtime load | A page with many mixed diagrams stays responsive and within a documented memory budget | 9,702 physical-device corpus renders across the three current tracks, plus the recorded Web, iOS Simulator, and Desktop baselines below | Passing for the recorded corpus on each platform |
 | Production isolation | Core and Compose contain no WebView, JavaScript engine or bundle, network client, or debug-UI dependency | Source, dependency, JVM JAR, and Android AAR scans; debug/release APKs declare no Internet permission | Passing; source boundary and APK permission are enforced by the Quality Gate |
 | Public-source safety | Published source and artifacts contain no internal endpoint or credential material | Repository scan plus APK permission audit | Passing |
 
@@ -99,10 +99,21 @@ The runtime load gate must record:
 
 | Platform | Corpus | Latency | Memory | Outcome |
 | --- | ---: | --- | --- | --- |
-| Android Emulator | 236 | See machine-readable prior baseline | See machine-readable prior baseline | Passed prior budget through Sankey; Treemap, Venn, Ishikawa, Cynefin, Event Modeling, Agentflow, Block, Swimlanes, and Architecture not included |
+| Android physical devices, Kotlin 2.3.20 | 441 x 8 | 53-78s per device | Diagnostic peak PSS: 293,331-470,521 KiB | 8/8 passed across Android 9-16; 0 crashes or ANRs; 72 sentinels reviewed |
+| Android physical devices, Kotlin 1.7.21 | 441 x 8 | 52-77s per device | Diagnostic peak PSS: 221,924-411,887 KiB | 8/8 passed across Android 9-16; 0 crashes or ANRs; 72 sentinels reviewed |
+| iOS physical devices | 441 x 6 | 57-123s per device | Device-wide usage snapshots only; not process RSS | 6/6 passed across iOS 14.3-26.0; 0 new crash reports; 54 sentinels reviewed |
+| Android Emulator | 236 | See machine-readable prior baseline | See machine-readable prior baseline | Retained historical baseline through Sankey |
 | iOS Simulator | 236 | See machine-readable prior baseline | See machine-readable prior baseline | Passed without a crash through Sankey; later implemented families not included |
 | Desktop | 236 | See machine-readable prior baseline | See machine-readable prior baseline | Passed without a crash through Sankey; later implemented families not included |
 | Web | 397 | 1,227ms first content; 22,455ms traversal across 185 scroll events | 18,417,340 bytes retained JS heap after forced GC | Passed; 397/397 rendered, final Agentflow case reached, no browser errors |
+
+The
+[Android physical-device report](android-real-device-compatibility.md)
+contains the device matrix, visual review, discovered Android ICU defect,
+post-fix results, scope limits, and public contact sheets.
+The
+[iOS physical-device report](ios-real-device-compatibility.md)
+contains the corresponding six-device iOS matrix and evidence.
 
 Headless Chromium process-tree RSS is recorded as diagnostic data but is not a
 renderer budget because it includes browser infrastructure outside the Web

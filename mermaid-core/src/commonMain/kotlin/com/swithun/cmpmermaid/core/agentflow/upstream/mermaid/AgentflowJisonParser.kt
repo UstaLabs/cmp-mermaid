@@ -1014,6 +1014,8 @@ internal class AgentflowJisonParser(
     private object EmptyStatement
 
     private companion object {
-        val TRAILING_METADATA_WHITESPACE = Regex("""}[^\S\n]*\n""")
+        // Mermaid.js 12.0.0: agentflow/parser/agentflowParser.ts -> newParser.parse
+        // Android ICU treats an unescaped `}` as invalid even though JavaScript accepts it.
+        val TRAILING_METADATA_WHITESPACE = Regex("""\}[^\S\n]*\n""")
     }
 }

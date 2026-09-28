@@ -18,6 +18,18 @@ fun MermaidLoadTestViewController(): UIViewController = ComposeUIViewController 
     )
 }
 
+fun MermaidAuditViewController(
+    demoId: String,
+    layout: String,
+): UIViewController = ComposeUIViewController {
+    MermaidDebugApp(
+        MermaidDebugLaunchOptions(
+            auditDemoId = demoId,
+            auditLayout = layout,
+        ),
+    )
+}
+
 @Composable
 internal actual fun OfficialMermaidDiagram(
     source: String,

@@ -704,12 +704,20 @@ private fun DiagramAuditScreen(
                 respectSourceViewportSizing = false,
                 onRenderResult = { result ->
                     auditStatus = when (result) {
-                        is GMResult.Ok ->
+                        is GMResult.Ok -> {
+                            if (!auditStatus.startsWith(AUDIT_STATUS_READY_PREFIX)) {
+                                println("$VISUAL_TEST_COMPLETE_MARKER ${demo.id}")
+                            }
                             "$AUDIT_STATUS_READY_PREFIX${result.value.toAuditManifestJson()}"
-                        is GMResult.Err ->
+                        }
+                        is GMResult.Err -> {
+                            if (!auditStatus.startsWith(AUDIT_STATUS_ERROR_PREFIX)) {
+                                println("$VISUAL_TEST_FAILURE_MARKER ${demo.id}: ${result.error}")
+                            }
                             "$AUDIT_STATUS_ERROR_PREFIX" +
                                 "${result.error.renderErrorType.name}:" +
                                 result.error.message
+                        }
                     }
                 },
             )
@@ -736,6 +744,8 @@ private fun DiagramAuditScreen(
 private const val AUDIT_STATUS_LOADING = "cmp-mermaid-audit:loading"
 private const val AUDIT_STATUS_READY_PREFIX = "cmp-mermaid-audit:ready:"
 private const val AUDIT_STATUS_ERROR_PREFIX = "cmp-mermaid-audit:error:"
+private const val VISUAL_TEST_COMPLETE_MARKER = "CMP_MERMAID_VISUAL_TEST_COMPLETE"
+private const val VISUAL_TEST_FAILURE_MARKER = "CMP_MERMAID_VISUAL_TEST_FAILED"
 
 internal val debugUiVersionLabel: String
     get() = "Mermaid ${MermaidCompatibility.BASELINE_VERSION}"

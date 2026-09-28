@@ -57,6 +57,9 @@ execute Mermaid.js, use a WebView, or depend on a JavaScript runtime.
 - The Jison grammar's generated tables are checked in as Kotlin data and
   executed by a portable Kotlin LALR/lexer runtime. Parse, validation, and
   resource-limit failures return `GMResult.Err`.
+- `agentflowParser.ts` normalizes horizontal whitespace after a metadata
+  closing brace with `/}[^\S\n]*\n/g`. Kotlin preserves that match by escaping
+  the literal closing brace because Android ICU rejects an unescaped `}`.
 - Upstream metadata parsing is represented by the shared Kotlin YAML subset.
   Scalar types, multiline blocks, unknown nested keys, trailing commas, and
   prototype-key filtering retain the tested Mermaid behavior.

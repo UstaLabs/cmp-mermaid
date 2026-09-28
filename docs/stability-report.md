@@ -2,9 +2,10 @@
 
 > [!NOTE]
 > This report records the completed Stable evidence for all 33 official
-> Mermaid `12.0.0` families. The load and soak measurements remain explicitly
-> identified as retained historical baselines rather than fresh 441-case
-> performance reruns. See the
+> Mermaid `12.0.0` families. Kotlin 2.3.20 Android, Kotlin 1.7.21 Android,
+> and iOS now have separate fresh 441-case physical-device matrices. Core soak,
+> iOS Simulator, Desktop, and Web runtime measurements remain explicitly
+> identified by their measured corpus sizes. See the
 > [33-family roadmap](full-diagram-roadmap.md).
 
 This report records published visual evidence for all 33 CMP Mermaid families.
@@ -31,9 +32,10 @@ Native-only randomized stress inputs.
 | Deterministic SceneGraph replay | 441 passed, 0 mismatches |
 | Built-in theme matrix | 363/363 renders passed: 33 diagram types by 11 themes |
 | Separate deterministic Native stress inputs | 7,936 |
-| JVM tests | 789 passed, 0 failed |
+| JVM tests | 791 passed, 0 failed |
 | Core production soak | 2,075 renders; 674ms total; 1ms P95; 63,968 bytes retained heap |
-| Runtime load matrix | Web retains the preceding 397-scenario baseline; Android Emulator, iOS Simulator, and Desktop retain the prior 236-scenario baseline |
+| Physical-device runtime matrix | Kotlin 2.3.20 Android 8/8, Kotlin 1.7.21 Android 8/8, and iOS 6/6 passed; 9,702 corpus renders; 198 reviewed sentinels plus 22 completion screenshots; 0 crashes or Android ANRs |
+| Runtime load matrix | All three physical-device tracks passed the complete 441-case corpus; Web retains the preceding 397-scenario baseline; iOS Simulator and Desktop retain the prior 236-scenario baseline |
 | Platform build matrix | Android debug/release, Web production, Desktop distributable, iOS Arm64, iOS Simulator Arm64, iOS X64 passed |
 | Android Internet permission | Not declared in debug or release APK |
 | Public-source safety scan | No organization-specific endpoint or credential pattern found |
@@ -1184,11 +1186,27 @@ forced GC.
 
 ## Runtime Load Matrix
 
-The shared load screen renders the production corpus in a `LazyColumn`. The
-latest Web runtime baseline covers the preceding 397 scenarios and walks from the first Flowchart
-to the final Agentflow case. Android, iOS, and Desktop retain the
-preceding 236-scenario run through the final Sankey case; those rows are
-historical baselines, not evidence for the subsequently implemented families.
+The shared load screen renders exactly one production-corpus case at a time
+and advances only after an explicit render result. The current physical-device
+evidence is split into three independent tracks:
+
+- Kotlin `2.3.20` Android: 8/8 devices across Android 9-16;
+- Kotlin `1.7.21` Android: the same 8/8 device matrix; and
+- iOS: 6/6 devices across iOS 14.3-26.0.
+
+Together these runs completed 9,702 corpus renders with no crash, Android ANR,
+or process exit. The separate visual gate reviewed 198 sentinel screenshots
+plus 22 final completion screenshots.
+
+**[Open the Android physical-device compatibility report and visual evidence](android-real-device-compatibility.md).**
+
+**[Open the iOS physical-device compatibility report and visual evidence](ios-real-device-compatibility.md).**
+
+The latest Web runtime baseline covers the preceding 397 scenarios and walks
+from the first Flowchart to the final Agentflow case. iOS Simulator and Desktop
+retain the preceding 236-scenario run through the final Sankey case; those rows
+are historical baselines, not evidence for the subsequently implemented
+families.
 
 The automated Web scroll budget scales with the corpus at 80ms per case, with
 a 15-second minimum. First content remains capped at 15 seconds and retained
@@ -1196,7 +1214,10 @@ JavaScript heap at 96MiB.
 
 | Platform | Corpus | Result | Local evidence |
 | --- | ---: | --- | --- |
-| Android Emulator | 236 | Prior baseline passed | 21s auto-run; 230MiB peak PSS; 184MiB final PSS; final Sankey case reached |
+| Android physical devices, Kotlin 2.3.20 | 441 x 8 | Passed post-fix matrix | 53-78s per device; 8/8 completed; 0 crashes or ANRs; 72 sentinels reviewed |
+| Android physical devices, Kotlin 1.7.21 | 441 x 8 | Passed post-fix matrix | 52-77s per device; 8/8 completed; 0 crashes or ANRs; 72 sentinels reviewed |
+| iOS physical devices | 441 x 6 | Passed physical-device matrix | 57-123s per device; 6/6 completed; 0 new crash reports; 54 sentinels reviewed |
+| Android Emulator | 236 | Prior baseline passed | Retained historical baseline through Sankey |
 | iOS Simulator | 236 | Prior baseline passed | Completion marker at 23s; 358MiB peak and final host RSS; no crash |
 | Desktop | 236 | Prior baseline passed | Completion marker in three consecutive runs; latest 21s and 432MiB RSS |
 | Web | 397 | Passed in 22,455ms after 1,227ms first content | 185 scroll events; 18,417,340 bytes retained JS heap; final Agentflow case reached; no browser errors |
@@ -1207,9 +1228,9 @@ Machine-readable measurements:
 [Desktop](assets/runtime-load/desktop-metrics.json), and
 [Web](assets/runtime-load/web-metrics.json).
 
-Android and iOS screenshots show the final Sankey case from the 236-scenario
-baseline. The Web screenshot shows the final Agentflow case from the preceding
-397-scenario corpus:
+The Android Emulator and iOS Simulator screenshots show the final Sankey case
+from the 236-scenario baseline. The Web screenshot shows the final Agentflow
+case from the preceding 397-scenario corpus:
 
 | Android Emulator | iOS Simulator |
 | :---: | :---: |
@@ -1223,6 +1244,11 @@ The current Desktop run is represented by its machine-readable process,
 completion-marker, timing, and RSS record. The automated macOS session could
 not capture the application window, so the older 132-case Desktop image is
 intentionally not used as current Sankey evidence.
+
+The Android matrix identified and fixed an Android ICU incompatibility in an
+Agentflow metadata-whitespace regular expression. The complete matrix passed
+after escaping the literal closing brace and adding focused parser regression
+tests.
 
 The iOS and Desktop runs identified and fixed the same class of native font
 concurrency defect: background text measurement could race Compose/Skia glyph
@@ -1356,6 +1382,7 @@ The Stable label requires all of these code-level gates:
 These criteria are satisfied for the supported Mermaid `12.0.0` contract. All
 33 official families are implemented and have completed the semantic,
 paint-order, perceptual, geometry, and manual contact-sheet gates. The public
-code status is therefore **Stable**. Performance values in this report remain
-labelled with their measured historical corpus sizes; no fresh 441-case load
-or soak result is implied.
+code status is therefore **Stable**. The Android Kotlin 2.3.20, Android Kotlin
+1.7.21, and iOS 441-case physical-device loads are fresh; the core soak and
+other runtime performance values remain labelled with their measured corpus
+sizes.

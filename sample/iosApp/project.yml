@@ -2,7 +2,7 @@ name: CMPMermaid
 options:
   bundleIdPrefix: com.swithun.cmpmermaid
   deploymentTarget:
-    iOS: "17.2"
+    iOS: "14.0"
 settings:
   base:
     DEVELOPMENT_TEAM: ""
